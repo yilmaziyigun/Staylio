@@ -1,0 +1,32 @@
+﻿@model Staylio.Dtos.WeatherForecastDto
+
+<h2>@Model.city.name, @Model.city.country Hava Durumu</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tarih</th>
+            <th>Durum</th>
+            <th>Sıcaklık</th>
+            <th>Hissedilen</th>
+            <th>Nem</th>
+            <th>Rüzgar</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.list)
+        {
+            <tr>
+                <td>@item.dt_txt</td>
+                <td>
+                    <img src="@item.weather.FirstOrDefault()?.icon" width="40" />
+                    @item.weather.FirstOrDefault()?.description
+                </td>
+                <td>@item.main.Temperature °C</td>
+                <td>@item.main.TemperatureFeelsLike °C</td>
+                <td>@item.main.humidity%</td>
+                <td>@item.wind.speed @item.wind.speed_unit</td>
+            </tr>
+        }
+    </tbody>
+</table>

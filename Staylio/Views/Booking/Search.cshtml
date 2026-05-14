@@ -1,0 +1,1411 @@
+@model Staylio.Models.SearchViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otel Ara - Staylio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --ink: #10201d;
+            --muted: #60716d;
+            --line: rgba(255, 255, 255, 0.34);
+            --glass: rgba(255, 255, 255, 0.82);
+            --brand: #0f766e;
+            --brand-dark: #115e59;
+            --accent: #f59e0b;
+            --danger: #b42318;
+        }
+
+        * {w
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #10201d;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            isolation: isolate;
+        }
+
+        .hero::before {
+            content: "";
+            position: fixed;
+            inset: -18px;
+            z-index: -2;
+            background:
+                linear-gradient(120deg, rgba(11, 32, 29, 0.86), rgba(11, 32, 29, 0.44) 48%, rgba(15, 118, 110, 0.42)),
+                url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2200&q=80") center / cover no-repeat;
+            filter: blur(8px);
+            transform: scale(1.04);
+        }
+
+        .hero::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.20), transparent 28%),
+                linear-gradient(180deg, rgba(9, 21, 19, 0.20), rgba(9, 21, 19, 0.72));
+            pointer-events: none;
+        }
+
+        .topbar {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            color: white;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 23px;
+            font-weight: 850;
+            letter-spacing: 0;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.26);
+            backdrop-filter: blur(14px);
+        }
+
+        .topbar-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.13);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 14px;
+            font-weight: 700;
+            backdrop-filter: blur(14px);
+        }
+
+        .hero-content {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            flex: 1;
+            display: grid;
+            align-items: center;
+            padding: 28px 0 56px;
+        }
+
+        .hero-content > div {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-copy {
+            max-width: 860px;
+            color: white;
+            margin: 0 auto 28px;
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: rgba(255, 255, 255, 0.90);
+            font-size: 13px;
+            font-weight: 750;
+            backdrop-filter: blur(14px);
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            margin: 0 auto;
+            max-width: 780px;
+            color: white;
+            font-size: clamp(42px, 6vw, 76px);
+            line-height: 1.02;
+            font-weight: 900;
+            letter-spacing: 0;
+            text-wrap: balance;
+        }
+
+        .hero-copy p {
+            margin: 18px auto 0;
+            max-width: 640px;
+            color: rgba(255, 255, 255, 0.83);
+            font-size: 19px;
+            line-height: 1.6;
+        }
+
+        .search-panel {
+            width: min(100%, 1120px);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--glass);
+            box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(18px);
+            padding: 18px;
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .panel-heading h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 850;
+            color: var(--ink);
+        }
+
+        .panel-heading span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .alert-soft {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            border: 1px solid rgba(180, 35, 24, 0.22);
+            background: rgba(255, 246, 245, 0.92);
+            color: var(--danger);
+            border-radius: 8px;
+            padding: 11px 12px;
+            margin-bottom: 14px;
+            font-size: 14px;
+            font-weight: 650;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: minmax(220px, 1.45fr) minmax(160px, 0.85fr) minmax(160px, 0.85fr) minmax(136px, 0.68fr) minmax(150px, 0.62fr);
+            gap: 10px;
+            align-items: end;
+        }
+
+        .form-field {
+            min-width: 0;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 7px;
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 780;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap > i {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--brand);
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .form-control,
+        .form-select {
+            width: 100%;
+            min-height: 52px;
+            border: 1px solid rgba(16, 32, 29, 0.16);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.90);
+            color: var(--ink);
+            font-size: 15px;
+            font-weight: 650;
+            padding: 12px 12px;
+            box-shadow: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .input-wrap .form-control,
+        .input-wrap .form-select {
+            padding-left: 40px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--brand);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.16);
+        }
+
+        .text-danger {
+            display: block;
+            margin-top: 6px;
+            color: var(--danger) !important;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .btn-search {
+            width: 100%;
+            min-height: 52px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #1f1603;
+            font-size: 15px;
+            font-weight: 850;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            box-shadow: 0 16px 36px rgba(245, 158, 11, 0.34);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-search:hover {
+            background: #fbbf24;
+            color: #1f1603;
+            transform: translateY(-1px);
+            box-shadow: 0 20px 44px rgba(245, 158, 11, 0.40);
+        }
+
+        .quick-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            color: rgba(255, 255, 255, 0.86);
+        }
+
+        .quick-label {
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .city-chip {
+            border: 1px solid rgba(255, 255, 255, 0.26);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.14);
+            color: white;
+            min-height: 38px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 750;
+            backdrop-filter: blur(12px);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .city-chip:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-1px);
+        }
+
+        .highlights {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            margin: 26px auto 0;
+            width: min(100%, 1080px);
+        }
+
+        .highlight {
+            min-height: 112px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            padding: 16px;
+            backdrop-filter: blur(14px);
+        }
+
+        .highlight i {
+            display: block;
+            color: #fbbf24;
+            font-size: 23px;
+            margin-bottom: 10px;
+        }
+
+        .highlight strong {
+            display: block;
+            font-size: 15px;
+            line-height: 1.3;
+            font-weight: 800;
+        }
+
+        .highlight span {
+            display: block;
+            margin-top: 6px;
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 13px;
+            line-height: 1.4;
+            font-weight: 650;
+        }
+
+        .live-insights {
+            width: min(100%, 1080px);
+            margin: 22px auto 0;
+            display: block;
+        }
+
+        .market-insights {
+            width: min(100%, 1080px);
+            margin: 12px auto 0;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .weather-card,
+        .api-learning-card {
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.14);
+            color: white;
+            backdrop-filter: blur(14px);
+            padding: 18px;
+        }
+
+        .crypto-card.is-loading,
+        .gasoline-card.is-loading,
+        .currency-card.is-loading {
+            opacity: 0.78;
+        }
+
+        .weather-card {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .weather-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .weather-card::before,
+        .weather-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+
+        .weather-card.weather-sunny::before {
+            opacity: 1;
+            background:
+                radial-gradient(circle at 14% 22%, rgba(251, 191, 36, 0.58), transparent 20%),
+                linear-gradient(115deg, rgba(251, 191, 36, 0.10), rgba(255, 255, 255, 0.08), transparent 68%);
+            animation: sunPulse 4.5s ease-in-out infinite;
+        }
+
+        .weather-card.weather-rainy::before {
+            opacity: 0.7;
+            background:
+                repeating-linear-gradient(110deg, rgba(255, 255, 255, 0.0) 0 12px, rgba(191, 219, 254, 0.55) 13px 15px, rgba(255, 255, 255, 0.0) 16px 30px);
+            background-size: 180px 180px;
+            animation: rainMove 0.7s linear infinite;
+        }
+
+        .weather-card.weather-rainy::after {
+            opacity: 1;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.16), rgba(14, 116, 144, 0.18));
+        }
+
+        .weather-card.weather-windy::before {
+            opacity: 0.75;
+            background:
+                repeating-linear-gradient(0deg, transparent 0 18px, rgba(255, 255, 255, 0.38) 19px 20px, transparent 21px 42px);
+            background-size: 260px 100%;
+            animation: windMove 1.6s linear infinite;
+        }
+
+        .weather-card.weather-cloudy::before {
+            opacity: 1;
+            background:
+                linear-gradient(135deg, rgba(148, 163, 184, 0.20), rgba(255, 255, 255, 0.08), rgba(15, 118, 110, 0.12));
+            animation: cloudDrift 6s ease-in-out infinite;
+        }
+
+        .weather-card.weather-snowy::before {
+            opacity: 0.8;
+            background:
+                radial-gradient(circle, rgba(255, 255, 255, 0.85) 0 1px, transparent 2px) 0 0 / 34px 34px,
+                radial-gradient(circle, rgba(255, 255, 255, 0.55) 0 1px, transparent 2px) 18px 12px / 42px 42px;
+            animation: snowFall 3.8s linear infinite;
+        }
+
+        @@keyframes sunPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.82;
+            }
+
+            50% {
+                transform: scale(1.08);
+                opacity: 1;
+            }
+        }
+
+        @@keyframes rainMove {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: -80px 120px;
+            }
+        }
+
+        @@keyframes windMove {
+            from {
+                background-position: -260px 0;
+            }
+
+            to {
+                background-position: 260px 0;
+            }
+        }
+
+        @@keyframes cloudDrift {
+            0%, 100% {
+                transform: translateX(-1%);
+            }
+
+            50% {
+                transform: translateX(2%);
+            }
+        }
+
+        @@keyframes snowFall {
+            from {
+                background-position: 0 -40px, 18px -28px;
+            }
+
+            to {
+                background-position: 0 80px, 18px 92px;
+            }
+        }
+
+        .weather-icon {
+            width: 68px;
+            height: 68px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.18);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .weather-icon img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+        }
+
+        .weather-icon img.is-hidden,
+        #weatherFallbackIcon.is-hidden {
+            display: none;
+        }
+
+        .weather-icon i {
+            color: #fbbf24;
+            font-size: 34px;
+        }
+
+        .weather-label,
+        .api-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: rgba(255, 255, 255, 0.76);
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .weather-title {
+            margin: 0;
+            color: white;
+            font-size: 22px;
+            line-height: 1.25;
+            font-weight: 850;
+        }
+
+        .weather-meta {
+            margin-top: 6px;
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 14px;
+            font-weight: 650;
+        }
+
+        .weather-temp {
+            min-width: 110px;
+            text-align: right;
+            color: white;
+            font-size: 38px;
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .weather-temp span {
+            display: block;
+            margin-top: 6px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 12px;
+            line-height: 1.35;
+            font-weight: 750;
+        }
+
+        .weather-card.is-loading {
+            opacity: 0.78;
+        }
+
+        .api-learning-card strong {
+            display: block;
+            color: white;
+            font-size: 17px;
+            line-height: 1.3;
+            font-weight: 850;
+            margin-bottom: 6px;
+        }
+
+        .api-learning-card span {
+            display: block;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 13px;
+            line-height: 1.45;
+            font-weight: 650;
+        }
+
+        .crypto-price-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: end;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .crypto-price-row:first-of-type {
+            border-top: 0;
+            padding-top: 4px;
+        }
+
+        .crypto-price-row strong {
+            margin: 0;
+            font-size: 15px;
+        }
+
+        .crypto-price-row small {
+            display: block;
+            margin-top: 2px;
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .crypto-price {
+            color: white;
+            font-size: 18px;
+            line-height: 1.1;
+            font-weight: 900;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .gasoline-rows {
+            min-height: 118px;
+        }
+
+        .currency-card .crypto-price-row {
+            align-items: center;
+        }
+
+        @@media (max-width: 1080px) {
+            .search-form {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .search-button-field {
+                grid-column: 1 / -1;
+            }
+
+            .market-insights {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+        }
+
+        @@media (max-width: 760px) {
+            .topbar,
+            .hero-content {
+                width: min(100% - 24px, 1180px);
+            }
+
+            .topbar {
+                min-height: 68px;
+            }
+
+            .topbar-meta {
+                display: none;
+            }
+
+            .hero-content {
+                align-items: start;
+                padding: 30px 0 48px;
+            }
+
+            .hero-copy {
+                margin-bottom: 22px;
+            }
+
+            .hero-copy p {
+                font-size: 16px;
+            }
+
+            .search-panel {
+                padding: 14px;
+            }
+
+            .panel-heading {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-row {
+                gap: 8px;
+            }
+
+            .city-chip {
+                min-height: 36px;
+                padding: 7px 10px;
+                font-size: 13px;
+            }
+
+            .highlights {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                margin-top: 18px;
+            }
+
+            .market-insights,
+            .weather-card {
+                grid-template-columns: 1fr;
+            }
+
+            .weather-temp {
+                text-align: left;
+            }
+
+        }
+
+        @@media (max-width: 560px) {
+            .highlights,
+            .market-insights {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="hero">
+        <header class="topbar">
+            <a class="brand" asp-controller="Booking" asp-action="Search">
+                <span class="brand-mark"><i class="bi bi-buildings"></i></span>
+                Staylio
+            </a>
+            <div class="topbar-meta">
+                <i class="bi bi-shield-check"></i>
+                Canlı otel verileri
+            </div>
+        </header>
+
+        <section class="hero-content">
+            <div>
+                <div class="hero-copy">
+                    <div class="eyebrow">
+                        <i class="bi bi-stars"></i>
+                        Şehir seç, otelleri karşılaştır
+                    </div>
+                    <h1>Konaklamanı birkaç saniyede bul.</h1>
+                    <p>Gideceğin şehri ve tarihleri seç; Staylio uygun otelleri, puanları, fotoğrafları ve detay sayfasını tek akışta getirsin.</p>
+                </div>
+
+                <section class="search-panel" aria-label="Otel arama formu">
+                    <div class="panel-heading">
+                        <h2>Otel ara</h2>
+                        <span><i class="bi bi-calendar2-check"></i> Tarihe göre müsaitlik</span>
+                    </div>
+
+                    @if (TempData["ErrorMessage"] != null || !string.IsNullOrEmpty(ViewBag.ErrorMessage))
+                    {
+                        <div class="alert-soft" role="alert">
+                            <i class="bi bi-exclamation-circle"></i>
+                            @(TempData["ErrorMessage"] ?? ViewBag.ErrorMessage)
+                        </div>
+                    }
+
+                    <form class="search-form" method="post" asp-action="HotelList" asp-controller="Booking" novalidate>
+                        <div class="form-field">
+                            <label asp-for="City" class="form-label">
+                                <i class="bi bi-geo-alt"></i>
+                                Nereye?
+                            </label>
+                            <div class="input-wrap">
+                                <i class="bi bi-search"></i>
+                                <input asp-for="City"
+                                       class="form-control"
+                                       id="city"
+                                       placeholder="İstanbul, Ankara, London"
+                                       autocomplete="off"
+                                       required>
+                            </div>
+                            @Html.ValidationMessageFor(m => m.City, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-field">
+                            <label asp-for="CheckInDate" class="form-label">
+                                <i class="bi bi-calendar-event"></i>
+                                Giriş
+                            </label>
+                            <div class="input-wrap">
+                                <i class="bi bi-calendar2-check"></i>
+                                <input asp-for="CheckInDate"
+                                       type="date"
+                                       class="form-control"
+                                       id="checkInDate"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label asp-for="CheckOutDate" class="form-label">
+                                <i class="bi bi-calendar-x"></i>
+                                Çıkış
+                            </label>
+                            <div class="input-wrap">
+                                <i class="bi bi-calendar2-week"></i>
+                                <input asp-for="CheckOutDate"
+                                       type="date"
+                                       class="form-control"
+                                       id="checkOutDate"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label asp-for="Guests" class="form-label">
+                                <i class="bi bi-people"></i>
+                                Kişi
+                            </label>
+                            <div class="input-wrap">
+                                <i class="bi bi-person-check"></i>
+                                <select asp-for="Guests" class="form-select" id="guests" required>
+                                    <option value="1">1 Kişi</option>
+                                    <option value="2">2 Kişi</option>
+                                    <option value="3">3 Kişi</option>
+                                    <option value="4">4 Kişi</option>
+                                    <option value="5">5 Kişi</option>
+                                    <option value="6">6 Kişi</option>
+                                    <option value="7">7 Kişi</option>
+                                    <option value="8">8+ Kişi</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-field search-button-field">
+                            <button type="submit" class="btn btn-search">
+                                <i class="bi bi-search"></i>
+                                Otel Bul
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <div class="quick-row" aria-label="Popüler şehirler">
+                    <span class="quick-label">Popüler:</span>
+                    <button type="button" class="city-chip" data-city="İstanbul">İstanbul</button>
+                    <button type="button" class="city-chip" data-city="Ankara">Ankara</button>
+                    <button type="button" class="city-chip" data-city="London">London</button>
+                    <button type="button" class="city-chip" data-city="Paris">Paris</button>
+                </div>
+
+                <div class="live-insights" aria-label="Canlı API bilgileri">
+                    <div class="weather-card" id="weatherCard">
+                        <div class="weather-icon">
+                            <img src="" alt="" id="weatherIcon" class="is-hidden">
+                            <i class="bi bi-cloud-sun" id="weatherFallbackIcon"></i>
+                        </div>
+                        <div>
+                            <div class="weather-label">
+                                <i class="bi bi-broadcast"></i>
+                                RapidAPI hava durumu
+                            </div>
+                            <h2 class="weather-title" id="weatherTitle">Şehir seçince hava durumu gösterilecek</h2>
+                            <div class="weather-meta" id="weatherMeta">
+                                Popüler şehirlerden birini seçebilir veya arama kutusuna şehir yazabilirsiniz.
+                            </div>
+                        </div>
+                        <div class="weather-temp" id="weatherTemp">
+                            --
+                            <span id="weatherDate">Şehir bekleniyor</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="market-insights" aria-label="Piyasa API bilgileri">
+                    <div class="api-learning-card crypto-card" id="cryptoCard">
+                        <div class="api-label">
+                            <i class="bi bi-currency-bitcoin"></i>
+                            RapidAPI kripto
+                        </div>
+                        <div class="crypto-price-row">
+                            <div>
+                                <strong>Bitcoin</strong>
+                                <small id="btcUsd">USD yükleniyor</small>
+                            </div>
+                            <div class="crypto-price" id="btcTry">-- TRY</div>
+                        </div>
+                        <div class="crypto-price-row">
+                            <div>
+                                <strong>Ethereum</strong>
+                                <small id="ethUsd">USD yükleniyor</small>
+                            </div>
+                            <div class="crypto-price" id="ethTry">-- TRY</div>
+                        </div>
+                        <span id="cryptoStatus">CoinGecko RapidAPI üzerinden fiyatlar alınıyor.</span>
+                    </div>
+
+                    <div class="api-learning-card gasoline-card" id="gasolineCard">
+                        <div class="api-label">
+                            <i class="bi bi-fuel-pump"></i>
+                            RapidAPI akaryakıt
+                        </div>
+                        <div class="gasoline-rows" id="gasolineRows">
+                            <div class="crypto-price-row">
+                                <div>
+                                    <strong>Avrupa fiyatları</strong>
+                                    <small>Gas Price RapidAPI yükleniyor</small>
+                                </div>
+                                <div class="crypto-price">--</div>
+                            </div>
+                        </div>
+                        <span id="gasolineStatus">Benzin ve motorin fiyatları alınıyor.</span>
+                    </div>
+
+                    <div class="api-learning-card currency-card" id="currencyCard">
+                        <div class="api-label">
+                            <i class="bi bi-cash-coin"></i>
+                            RapidAPI döviz
+                        </div>
+                        <div class="crypto-price-row">
+                            <div>
+                                <strong>USD / EUR</strong>
+                                <small>1 doların euro karşılığı</small>
+                            </div>
+                            <div class="crypto-price" id="usdEur">-- EUR</div>
+                        </div>
+                        <div class="crypto-price-row">
+                            <div>
+                                <strong>USD / TRY</strong>
+                                <small>1 doların TL karşılığı</small>
+                            </div>
+                            <div class="crypto-price" id="usdTry">-- TRY</div>
+                        </div>
+                        <div class="crypto-price-row">
+                            <div>
+                                <strong>EUR / TRY</strong>
+                                <small>1 euronun TL karşılığı</small>
+                            </div>
+                            <div class="crypto-price" id="eurTry">-- TRY</div>
+                        </div>
+                        <span id="currencyStatus">Döviz kurları alınıyor.</span>
+                    </div>
+                </div>
+
+                <div class="highlights" aria-label="Rezervasyon avantajları">
+                    <div class="highlight">
+                        <i class="bi bi-credit-card"></i>
+                        <strong>Şimdi rezervasyon yapın, tesiste ödeyin</strong>
+                        <span>Seçili tesislerde ödeme koşullarını rezervasyon öncesi inceleyin.</span>
+                    </div>
+                    <div class="highlight">
+                        <i class="bi bi-calendar2-x"></i>
+                        <strong>Pek çok odada ücretsiz iptal</strong>
+                        <span>Planınız değişirse esnek seçenekleri kolayca karşılaştırın.</span>
+                    </div>
+                    <div class="highlight">
+                        <i class="bi bi-chat-square-heart"></i>
+                        <strong>300 milyondan fazla değerlendirme</strong>
+                        <span>Sizin gibi konuklardan gelen güvenilir bilgilerle karar verin.</span>
+                    </div>
+                    <div class="highlight">
+                        <i class="bi bi-buildings"></i>
+                        <strong>Dünya genelinde 2 milyondan fazla tesis</strong>
+                        <span>Otel, konukevi, daire ve daha fazlasını tek aramada keşfedin.</span>
+                    </div>
+                    <div class="highlight">
+                        <i class="bi bi-headset"></i>
+                        <strong>7/24 güvenilir destek</strong>
+                        <span>Rezervasyon yolculuğunuzda ihtiyaç duyduğunuzda yardım alın.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const checkInDate = document.getElementById('checkInDate');
+            const checkOutDate = document.getElementById('checkOutDate');
+            const cityInput = document.getElementById('city');
+            const weatherCard = document.getElementById('weatherCard');
+            const weatherIcon = document.getElementById('weatherIcon');
+            const weatherFallbackIcon = document.getElementById('weatherFallbackIcon');
+            const weatherTitle = document.getElementById('weatherTitle');
+            const weatherMeta = document.getElementById('weatherMeta');
+            const weatherTemp = document.getElementById('weatherTemp');
+            const weatherDate = document.getElementById('weatherDate');
+            const cryptoCard = document.getElementById('cryptoCard');
+            const btcTry = document.getElementById('btcTry');
+            const btcUsd = document.getElementById('btcUsd');
+            const ethTry = document.getElementById('ethTry');
+            const ethUsd = document.getElementById('ethUsd');
+            const cryptoStatus = document.getElementById('cryptoStatus');
+            const gasolineCard = document.getElementById('gasolineCard');
+            const gasolineRows = document.getElementById('gasolineRows');
+            const gasolineStatus = document.getElementById('gasolineStatus');
+            const currencyCard = document.getElementById('currencyCard');
+            const usdEur = document.getElementById('usdEur');
+            const usdTry = document.getElementById('usdTry');
+            const eurTry = document.getElementById('eurTry');
+            const currencyStatus = document.getElementById('currencyStatus');
+            let weatherTimer = null;
+
+            const toDateInputValue = (date) => date.toISOString().split('T')[0];
+
+            if (checkInDate && checkOutDate) {
+                checkInDate.min = toDateInputValue(tomorrow);
+
+                if (!checkInDate.value) {
+                    checkInDate.value = toDateInputValue(tomorrow);
+                }
+
+                const setCheckoutMinimum = () => {
+                    const selectedDate = new Date(checkInDate.value);
+                    const minCheckOut = new Date(selectedDate);
+                    minCheckOut.setDate(minCheckOut.getDate() + 1);
+
+                    checkOutDate.min = toDateInputValue(minCheckOut);
+
+                    if (!checkOutDate.value || new Date(checkOutDate.value) <= selectedDate) {
+                        checkOutDate.value = toDateInputValue(minCheckOut);
+                    }
+                };
+
+                setCheckoutMinimum();
+                checkInDate.addEventListener('change', setCheckoutMinimum);
+            }
+
+            document.querySelectorAll('[data-city]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    if (!cityInput) {
+                        return;
+                    }
+
+                    cityInput.value = button.getAttribute('data-city');
+                    cityInput.focus();
+                    loadWeather(cityInput.value);
+                    loadGasoline(cityInput.value);
+                });
+            });
+
+            if (cityInput) {
+                cityInput.addEventListener('input', function () {
+                    window.clearTimeout(weatherTimer);
+
+                    weatherTimer = window.setTimeout(function () {
+                        if (cityInput.value.trim().length >= 2) {
+                            loadWeather(cityInput.value);
+                            loadGasoline(cityInput.value);
+                        } else {
+                            resetWeather();
+                            resetGasoline();
+                        }
+                    }, 650);
+                });
+
+                cityInput.addEventListener('blur', function () {
+                    if (cityInput.value.trim().length >= 2) {
+                        loadWeather(cityInput.value);
+                        loadGasoline(cityInput.value);
+                    }
+                });
+            }
+
+            loadCrypto();
+            loadCurrency();
+
+            function resetWeather() {
+                if (!weatherTitle || !weatherMeta || !weatherTemp || !weatherDate) {
+                    return;
+                }
+
+                setWeatherEffect();
+                weatherTitle.textContent = 'Şehir seçince hava durumu gösterilecek';
+                weatherMeta.textContent = 'Popüler şehirlerden birini seçebilir veya arama kutusuna şehir yazabilirsiniz.';
+                weatherTemp.firstChild.textContent = '--';
+                weatherDate.textContent = 'Şehir bekleniyor';
+
+                if (weatherIcon && weatherFallbackIcon) {
+                    weatherIcon.classList.add('is-hidden');
+                    weatherIcon.removeAttribute('src');
+                    weatherFallbackIcon.classList.remove('is-hidden');
+                }
+            }
+
+            function resetGasoline() {
+                if (!gasolineRows || !gasolineStatus) {
+                    return;
+                }
+
+                gasolineRows.innerHTML = '';
+
+                const row = document.createElement('div');
+                row.className = 'crypto-price-row';
+
+                const text = document.createElement('div');
+                const title = document.createElement('strong');
+                const detail = document.createElement('small');
+                const price = document.createElement('div');
+
+                title.textContent = 'Şehir seçince gösterilecek';
+                detail.textContent = 'Gas Price RapidAPI ülke bazlı fiyat döndürür.';
+                price.className = 'crypto-price';
+                price.textContent = '--';
+
+                text.appendChild(title);
+                text.appendChild(detail);
+                row.appendChild(text);
+                row.appendChild(price);
+                gasolineRows.appendChild(row);
+
+                gasolineStatus.textContent = 'Akaryakıt fiyatı için şehir seçin.';
+            }
+
+            async function loadWeather(city) {
+                const selectedCity = city.trim();
+
+                if (!selectedCity || !weatherCard || !weatherTitle || !weatherMeta || !weatherTemp || !weatherDate) {
+                    resetWeather();
+                    return;
+                }
+
+                weatherCard.classList.add('is-loading');
+                weatherTitle.textContent = selectedCity + ' için hava durumu alınıyor';
+                weatherMeta.textContent = 'RapidAPI isteği gönderiliyor...';
+                weatherTemp.firstChild.textContent = '--';
+                weatherDate.textContent = 'Yükleniyor';
+
+                try {
+                    const response = await fetch('/Booking/GetWeather?city=' + encodeURIComponent(selectedCity));
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        weatherTitle.textContent = selectedCity + ' için hava durumu alınamadı';
+                        weatherMeta.textContent = data.message || 'RapidAPI cevabı şu an görüntülenemiyor.';
+                        weatherTemp.firstChild.textContent = '--';
+                        weatherDate.textContent = 'Tekrar deneyin';
+                        setWeatherEffect();
+                        return;
+                    }
+
+                    setWeatherEffect(data.condition, data.description, data.wind);
+                    weatherTitle.textContent = data.city + ' - ' + data.description;
+                    weatherMeta.textContent = 'Hissedilen ' + data.feelsLike + data.unit + ', nem %' + data.humidity + ', rüzgar ' + data.wind;
+                    weatherTemp.firstChild.textContent = data.temperature + data.unit;
+                    weatherDate.textContent = data.date || '3 saatlik tahmin';
+
+                    if (weatherIcon && weatherFallbackIcon && data.icon) {
+                        weatherIcon.src = data.icon;
+                        weatherIcon.alt = data.description || 'Hava durumu';
+                        weatherIcon.classList.remove('is-hidden');
+                        weatherFallbackIcon.classList.add('is-hidden');
+                    }
+                } catch {
+                    weatherTitle.textContent = selectedCity + ' için hava durumu alınamadı';
+                    weatherMeta.textContent = 'İstek sırasında bağlantı hatası oluştu.';
+                    weatherTemp.firstChild.textContent = '--';
+                    weatherDate.textContent = 'Tekrar deneyin';
+                    setWeatherEffect();
+                } finally {
+                    weatherCard.classList.remove('is-loading');
+                }
+            }
+
+            function setWeatherEffect(condition, description, wind) {
+                if (!weatherCard) {
+                    return;
+                }
+
+                weatherCard.classList.remove('weather-sunny', 'weather-rainy', 'weather-windy', 'weather-cloudy', 'weather-snowy');
+
+                const text = ((condition || '') + ' ' + (description || '')).toLowerCase();
+                const windSpeed = Number.parseFloat(String(wind || '').replace(',', '.'));
+
+                if (text.includes('snow')) {
+                    weatherCard.classList.add('weather-snowy');
+                    return;
+                }
+
+                if (text.includes('rain') || text.includes('drizzle') || text.includes('storm') || text.includes('thunder')) {
+                    weatherCard.classList.add('weather-rainy');
+                    return;
+                }
+
+                if (text.includes('wind') || (!Number.isNaN(windSpeed) && windSpeed >= 5)) {
+                    weatherCard.classList.add('weather-windy');
+                    return;
+                }
+
+                if (text.includes('clear') || text.includes('sun')) {
+                    weatherCard.classList.add('weather-sunny');
+                    return;
+                }
+
+                if (text.includes('cloud') || text.includes('mist') || text.includes('fog') || text.includes('haze')) {
+                    weatherCard.classList.add('weather-cloudy');
+                    return;
+                }
+
+            }
+
+            async function loadCrypto() {
+                if (!cryptoCard || !btcTry || !btcUsd || !ethTry || !ethUsd || !cryptoStatus) {
+                    return;
+                }
+
+                cryptoCard.classList.add('is-loading');
+                cryptoStatus.textContent = 'CoinGecko RapidAPI üzerinden fiyatlar alınıyor.';
+
+                try {
+                    const response = await fetch('/Booking/GetCrypto');
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        cryptoStatus.textContent = data.message || 'Kripto fiyatları alınamadı.';
+                        btcTry.textContent = '-- TRY';
+                        btcUsd.textContent = 'USD alınamadı';
+                        ethTry.textContent = '-- TRY';
+                        ethUsd.textContent = 'USD alınamadı';
+                        return;
+                    }
+
+                    btcTry.textContent = data.bitcoinTry + ' TRY';
+                    btcUsd.textContent = data.bitcoinUsd + ' USD';
+                    ethTry.textContent = data.ethereumTry + ' TRY';
+                    ethUsd.textContent = data.ethereumUsd + ' USD';
+                    cryptoStatus.textContent = 'BTC ve ETH fiyatları canlı API isteğiyle getirildi.';
+                } catch {
+                    cryptoStatus.textContent = 'Kripto servisine bağlanırken hata oluştu.';
+                    btcTry.textContent = '-- TRY';
+                    btcUsd.textContent = 'USD alınamadı';
+                    ethTry.textContent = '-- TRY';
+                    ethUsd.textContent = 'USD alınamadı';
+                } finally {
+                    cryptoCard.classList.remove('is-loading');
+                }
+            }
+
+            async function loadGasoline(city) {
+                const selectedCity = city.trim();
+
+                if (!gasolineCard || !gasolineRows || !gasolineStatus) {
+                    return;
+                }
+
+                if (!selectedCity) {
+                    resetGasoline();
+                    return;
+                }
+
+                gasolineCard.classList.add('is-loading');
+                gasolineStatus.textContent = selectedCity + ' için akaryakıt fiyatı alınıyor.';
+
+                try {
+                    const response = await fetch('/Booking/GetGasoline?city=' + encodeURIComponent(selectedCity));
+                    const data = await response.json();
+
+                    gasolineRows.innerHTML = '';
+
+                    if (!data.success || !Array.isArray(data.items) || data.items.length === 0) {
+                        const row = document.createElement('div');
+                        row.className = 'crypto-price-row';
+
+                        const text = document.createElement('div');
+                        const title = document.createElement('strong');
+                        const detail = document.createElement('small');
+                        const price = document.createElement('div');
+
+                        title.textContent = selectedCity;
+                        detail.textContent = data.message || 'Akaryakıt verisi alınamadı.';
+                        price.className = 'crypto-price';
+                        price.textContent = '--';
+
+                        text.appendChild(title);
+                        text.appendChild(detail);
+                        row.appendChild(text);
+                        row.appendChild(price);
+                        gasolineRows.appendChild(row);
+                        gasolineStatus.textContent = data.message || 'Akaryakıt fiyatları alınamadı.';
+                        return;
+                    }
+
+                    data.items.forEach(function (item) {
+                        const row = document.createElement('div');
+                        row.className = 'crypto-price-row';
+
+                        const text = document.createElement('div');
+                        const title = document.createElement('strong');
+                        const detail = document.createElement('small');
+                        const price = document.createElement('div');
+                        const currency = item.currency ? ' ' + item.currency : '';
+                        const detailParts = [];
+
+                        if (item.diesel && item.diesel !== '-') {
+                            detailParts.push('Motorin ' + item.diesel + currency);
+                        }
+
+                        if (item.lpg && item.lpg !== '-') {
+                            detailParts.push('LPG ' + item.lpg + currency);
+                        }
+
+                        title.textContent = item.country || data.selectedCountry || selectedCity;
+                        detail.textContent = detailParts.length > 0 ? detailParts.join(' / ') : 'Ülke bazlı akaryakıt verisi';
+                        price.className = 'crypto-price';
+                        price.textContent = item.gasoline && item.gasoline !== '-' ? item.gasoline + currency : '--';
+
+                        text.appendChild(title);
+                        text.appendChild(detail);
+                        row.appendChild(text);
+                        row.appendChild(price);
+                        gasolineRows.appendChild(row);
+                    });
+
+                    gasolineStatus.textContent = (data.selectedCountry || selectedCity) + ' için Gas Price RapidAPI verisi getirildi.';
+                } catch {
+                    gasolineRows.innerHTML = '';
+                    gasolineStatus.textContent = 'Akaryakıt servisine bağlanırken hata oluştu.';
+                } finally {
+                    gasolineCard.classList.remove('is-loading');
+                }
+            }
+
+            async function loadCurrency() {
+                if (!currencyCard || !usdEur || !usdTry || !eurTry || !currencyStatus) {
+                    return;
+                }
+
+                currencyCard.classList.add('is-loading');
+                currencyStatus.textContent = 'Döviz kurları RapidAPI üzerinden alınıyor.';
+
+                try {
+                    const response = await fetch('/Booking/GetCurrency');
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        usdEur.textContent = '-- EUR';
+                        usdTry.textContent = '-- TRY';
+                        eurTry.textContent = '-- TRY';
+                        currencyStatus.textContent = data.message || 'Döviz kurları alınamadı.';
+                        return;
+                    }
+
+                    usdEur.textContent = data.usdEur + ' EUR';
+                    usdTry.textContent = data.usdTry + ' TRY';
+                    eurTry.textContent = data.eurTry + ' TRY';
+                    currencyStatus.textContent = 'USD, EUR ve TRY kurları canlı API isteğiyle getirildi.';
+                } catch {
+                    usdEur.textContent = '-- EUR';
+                    usdTry.textContent = '-- TRY';
+                    eurTry.textContent = '-- TRY';
+                    currencyStatus.textContent = 'Döviz servisine bağlanırken hata oluştu.';
+                } finally {
+                    currencyCard.classList.remove('is-loading');
+                }
+            }
+
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,826 @@
+﻿@model Staylio.Dtos.HotelDetailDto
+@{
+    var photos = ViewBag.Photos as List<Staylio.Dtos.HotelPhotoDto>;
+    var mapUrl = "";
+
+    if (Model?.Latitude != null && Model?.Longitude != null)
+    {
+        var latitude = Model.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var longitude = Model.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        mapUrl = $"https://maps.google.com/maps?q={latitude},{longitude}&z=15&output=embed";
+    }
+}
+
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@(Model?.HotelName ?? "Otel Detayları") - Staylio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f4f7f6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #10201d 0%, #0f766e 100%);
+            color: white;
+            padding: 16px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .back-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+                color: white;
+            }
+
+        .detail-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 15px;
+        }
+
+        /* Galeri Bölümü */
+        .gallery-section {
+            margin-bottom: 40px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            background: #e9ecef;
+            display: block;
+        }
+
+        .placeholder-image {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: #adb5bd;
+        }
+
+        .thumbnail-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+            padding: 12px;
+            background: white;
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+            .thumbnail:hover,
+            .thumbnail.active {
+                border-color: #0f766e;
+                transform: scale(1.05);
+            }
+
+        .thumbnail-button {
+            border: 0;
+            padding: 0;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+            .thumbnail-button:focus-visible {
+                outline: 3px solid rgba(15, 118, 110, 0.35);
+                outline-offset: 3px;
+            }
+
+        /* Bilgi Kartı */
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .hotel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hotel-title {
+            flex: 1;
+        }
+
+        .hotel-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .hotel-meta {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .meta-item i {
+                font-size: 18px;
+                color: #0f766e;
+            }
+
+        .meta-label {
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .meta-value {
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .rating-box {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #10201d 0%, #0f766e 100%);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .rating-score {
+            font-size: 36px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .rating-word {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* İnfo Sektion */
+        .info-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+            .info-section:last-child {
+                border-bottom: none;
+            }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .section-title i {
+                color: #0f766e;
+                font-size: 20px;
+            }
+
+        .section-content {
+            color: #495057;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 12px;
+        }
+
+        .info-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #0f766e;
+        }
+
+        .assurance-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            margin: 6px 0 30px;
+            padding: 16px;
+            border-radius: 8px;
+            background: #f8faf9;
+            border: 1px solid #dce5e1;
+        }
+
+        .assurance-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .assurance-item i {
+            color: #f59e0b;
+            font-size: 20px;
+            margin-top: 2px;
+            flex: 0 0 auto;
+        }
+
+        .assurance-item strong {
+            display: block;
+            color: #10201d;
+            font-size: 13px;
+            line-height: 1.35;
+            font-weight: 800;
+        }
+
+        .assurance-item span {
+            display: block;
+            margin-top: 3px;
+            color: #60716d;
+            font-size: 12px;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .info-item-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .info-item-value {
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .feature-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            color: #1a1a1a;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .feature-badge i {
+            color: #0f766e;
+        }
+
+        .map-frame {
+            width: 100%;
+            height: 320px;
+            border: 0;
+            border-radius: 8px;
+            background: #e9ecef;
+        }
+
+        .map-note {
+            margin-top: 8px;
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-action {
+            flex: 1;
+            min-width: 200px;
+            padding: 14px 24px;
+            background: #f59e0b;
+            color: #1f1603;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+            .btn-primary-action:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(245, 158, 11, 0.32);
+                color: #1f1603;
+            }
+
+        .btn-secondary-action {
+            padding: 14px 24px;
+            background: white;
+            color: #0f766e;
+            border: 2px solid #0f766e;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+            .btn-secondary-action:hover {
+                background: #f8f9fa;
+                color: #0f766e;
+            }
+
+        /* Error Banner */
+        .error-banner {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .hotel-header
+
+        {
+            flex-direction: column;
+        }
+
+        .hotel-name {
+            font-size: 24px;
+        }
+
+        .main-image {
+            height: 300px;
+        }
+
+        .info-card {
+            padding: 20px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-primary-action,
+        .btn-secondary-action {
+            min-width: 100%;
+        }
+
+        .hotel-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .assurance-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        }
+
+        @@media (max-width: 576px) {
+            .detail-container
+
+        {
+            margin: 20px auto;
+        }
+
+        .info-card {
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .hotel-name {
+            font-size: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+        }
+
+        .rating-score {
+            font-size: 28px;
+        }
+
+        .assurance-grid {
+            grid-template-columns: 1fr;
+            padding: 14px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="bi bi-building"></i> Staylio
+                </div>
+                <a asp-action="HotelList" asp-controller="Booking" class="back-btn">
+                    <i class="bi bi-arrow-left"></i> Geri
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="detail-container">
+        <!-- Error Banner -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="error-banner alert alert-danger">
+                <i class="bi bi-exclamation-circle"></i>
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        @if (Model == null)
+        {
+            <div class="alert alert-warning text-center" style="padding: 50px 20px;">
+                <i class="bi bi-exclamation-triangle" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+                <h4>Otel Bilgileri Yüklenemedi</h4>
+                <p>Lütfen geri dönüp tekrar deneyin.</p>
+                <a asp-action="HotelList" asp-controller="Booking" class="btn btn-primary mt-3">
+                    <i class="bi bi-arrow-left"></i> Listeye Dön
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Galeri Bölümü -->
+            @if (photos != null && photos.Count > 0)
+            {
+                <div class="gallery-section">
+                    <img src="@photos[0].url" class="main-image" id="mainHotelImage" alt="@Model.HotelName" />
+
+                    @if (photos.Count > 1)
+                    {
+                        <div class="thumbnail-gallery">
+                            @foreach (var photo in photos.Take(8))
+                            {
+                                <button type="button"
+                                        class="thumbnail-button"
+                                        data-photo-url="@photo.url"
+                                        aria-label="Otel görselini büyüt">
+                                    <img src="@photo.url" class="thumbnail @(photo == photos[0] ? "active" : "")" alt="@Model.HotelName" />
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="gallery-section">
+                    <div class="placeholder-image">
+                        <i class="bi bi-image"></i>
+                    </div>
+                </div>
+            }
+
+
+            <!-- Bilgi Kartı -->
+            <div class="info-card">
+                <!-- Başlık ve Puan -->
+                <div class="hotel-header">
+                    <div class="hotel-title">
+                        <h1 class="hotel-name">
+                            @(!string.IsNullOrWhiteSpace(Model.HotelName)
+                                                    ? Model.HotelName
+                                                    : "Otel Adı Belirtilmemiş")
+                    </h1>
+                    <div class="hotel-meta">
+                        @if (!string.IsNullOrWhiteSpace(Model.AccommodationTypeName))
+                            {
+                                <div class="meta-item">
+                                    <i class="bi bi-building"></i>
+                                    <span class="meta-value">@Model.AccommodationTypeName</span>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(Model.City))
+                            {
+                                <div class="meta-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span class="meta-value">@Model.City</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @if (Model.ReviewScore.HasValue && Model.ReviewScore.Value > 0)
+                    {
+                        <div class="rating-box">
+                            <span class="rating-score">@Model.ReviewScore.Value.ToString("F1")</span>
+                            <span class="rating-word">
+                                @(!string.IsNullOrWhiteSpace(Model.ReviewScoreWord)
+                                                        ? Model.ReviewScoreWord
+                                                        : "Puanlandı")
+                    </span>
+                </div>
+                                }
+                </div>
+
+                <div class="assurance-grid" aria-label="Rezervasyon avantajları">
+                    <div class="assurance-item">
+                        <i class="bi bi-credit-card"></i>
+                        <div>
+                            <strong>Şimdi rezervasyon yapın, tesiste ödeyin</strong>
+                            <span>Seçili tesislerde ödeme koşullarını rezervasyon öncesi inceleyin.</span>
+                        </div>
+                    </div>
+                    <div class="assurance-item">
+                        <i class="bi bi-calendar2-x"></i>
+                        <div>
+                            <strong>Pek çok odada ücretsiz iptal</strong>
+                            <span>Planınız değişirse esnek seçenekleri karşılaştırın.</span>
+                        </div>
+                    </div>
+                    <div class="assurance-item">
+                        <i class="bi bi-chat-square-heart"></i>
+                        <div>
+                            <strong>Güvenilir konuk değerlendirmeleri</strong>
+                            <span>Puan ve yorum sinyalleriyle daha rahat karar verin.</span>
+                        </div>
+                    </div>
+                    <div class="assurance-item">
+                        <i class="bi bi-buildings"></i>
+                        <div>
+                            <strong>Dünya genelinde geniş tesis seçeneği</strong>
+                            <span>Otel, daire, konukevi ve daha fazlasını karşılaştırın.</span>
+                        </div>
+                    </div>
+                    <div class="assurance-item">
+                        <i class="bi bi-headset"></i>
+                        <div>
+                            <strong>7/24 destek bilgisi</strong>
+                            <span>Rezervasyon sürecinde destek seçeneklerini görüntüleyin.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adres Bilgisi -->
+                @if (!string.IsNullOrWhiteSpace(Model.Address) || !string.IsNullOrWhiteSpace(Model.Zip) || !string.IsNullOrWhiteSpace(Model.CountryTrans))
+                {
+                    <div class="info-section">
+                        <div class="section-title">
+                            <i class="bi bi-geo-alt"></i> Konum Bilgileri
+                        </div>
+                        <div class="info-grid">
+                            @if (!string.IsNullOrWhiteSpace(Model.Address))
+                            {
+                                <div class="info-item">
+                                    <div class="info-item-label">Adres</div>
+                                    <div class="info-item-value">@Model.Address</div>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(Model.City))
+                            {
+                                <div class="info-item">
+                                    <div class="info-item-label">Şehir</div>
+                                    <div class="info-item-value">@Model.City</div>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Zip))
+                            {
+                                <div class="info-item">
+                                    <div class="info-item-label">Posta Kodu</div>
+                                    <div class="info-item-value">@Model.Zip</div>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(Model.CountryTrans))
+                            {
+                                <div class="info-item">
+                                    <div class="info-item-label">Ülke</div>
+                                    <div class="info-item-value">@Model.CountryTrans</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(mapUrl))
+                {
+                    <div class="info-section">
+                        <div class="section-title">
+                            <i class="bi bi-map"></i> Harita
+                        </div>
+                        <iframe class="map-frame"
+                                src="@mapUrl"
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                        <div class="map-note">
+                            Konum bilgisi tesis detaylarından alınmıştır.
+                        </div>
+                    </div>
+                }
+
+                @if (Model.TopUfiBenefits != null && Model.TopUfiBenefits.Any())
+                {
+                    <div class="info-section">
+                        <div class="section-title">
+                            <i class="bi bi-stars"></i> Tesisin Öne Çıkan Noktaları
+                        </div>
+                        <div class="feature-list">
+                            @foreach (var benefit in Model.TopUfiBenefits.Where(x => !string.IsNullOrWhiteSpace(x.TranslatedName)).Take(12))
+                            {
+                                <span class="feature-badge">
+                                    <i class="bi bi-check-circle"></i>
+                                    @benefit.TranslatedName
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (Model.FacilitiesBlock?.Facilities != null && Model.FacilitiesBlock.Facilities.Any())
+                {
+                    <div class="info-section">
+                        <div class="section-title">
+                            <i class="bi bi-grid"></i> En Popüler Özellikler
+                        </div>
+                        <div class="feature-list">
+                            @foreach (var facility in Model.FacilitiesBlock.Facilities.Where(x => !string.IsNullOrWhiteSpace(x.Name)).Take(18))
+                            {
+                                <span class="feature-badge">
+                                    <i class="bi bi-check2"></i>
+                                    @facility.Name
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Konaklama Tipi -->
+                @if (!string.IsNullOrWhiteSpace(Model.AccommodationTypeName))
+                {
+                    <div class="info-section">
+                        <div class="section-title">
+                            <i class="bi bi-house"></i> Konaklama Türü
+                        </div>
+                        <div class="section-content">
+                            @Model.AccommodationTypeName
+                        </div>
+                    </div>
+                }
+
+                <!-- Açıklama -->
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <div class="info-section">
+                        <div class="section-title">
+                            <i class="bi bi-file-text"></i> Hakkında
+                        </div>
+                        <div class="section-content">
+                            @Html.Raw(Model.Description.Replace("\n", "<br>"))
+                        </div>
+                    </div>
+                }
+
+                <!-- İşlemler -->
+                <div class="action-buttons">
+                    @if (!string.IsNullOrWhiteSpace(Model.Url))
+                    {
+                        <a href="@Model.Url" target="_blank" class="btn-primary-action">
+                            <i class="bi bi-box-arrow-up-right"></i> Rezervasyonu Görüntüle
+                        </a>
+                    }
+                    <a asp-action="HotelList" asp-controller="Booking" class="btn-secondary-action">
+                        <i class="bi bi-arrow-left"></i> Listeye Dön
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mainImage = document.getElementById('mainHotelImage');
+            const thumbnailButtons = document.querySelectorAll('.thumbnail-button');
+
+            if (!mainImage || thumbnailButtons.length === 0) {
+                return;
+            }
+
+            thumbnailButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const photoUrl = button.getAttribute('data-photo-url');
+
+                    if (!photoUrl) {
+                        return;
+                    }
+
+                    mainImage.src = photoUrl;
+
+                    document.querySelectorAll('.thumbnail').forEach(function (thumbnail) {
+                        thumbnail.classList.remove('active');
+                    });
+
+                    const selectedThumbnail = button.querySelector('.thumbnail');
+                    if (selectedThumbnail) {
+                        selectedThumbnail.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

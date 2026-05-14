@@ -1,0 +1,892 @@
+@model List<Staylio.Dtos.BookingHotelDto>
+
+@{
+    Layout = null;
+    var hotels = Model?.Where(x => x?.property != null).ToList() ?? new List<Staylio.Dtos.BookingHotelDto>();
+    var searchCity = TempData.Peek("SearchCity")?.ToString() ?? "Seçilen şehir";
+    var checkInDate = TempData.Peek("CheckInDate")?.ToString() ?? "Tarih seçilmedi";
+    var checkOutDate = TempData.Peek("CheckOutDate")?.ToString() ?? "Tarih seçilmedi";
+    var guests = TempData.Peek("Guests")?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otel Sonuçları - Staylio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --page: #f4f7f6;
+            --surface: #ffffff;
+            --ink: #10201d;
+            --muted: #60716d;
+            --line: #dce5e1;
+            --brand: #0f766e;
+            --brand-dark: #115e59;
+            --accent: #f59e0b;
+            --danger: #b42318;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--page);
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .page-header {
+            background:
+                linear-gradient(120deg, rgba(16, 32, 29, 0.94), rgba(15, 118, 110, 0.88)),
+                url("https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1800&q=80") center / cover no-repeat;
+            color: white;
+            padding: 18px 0 34px;
+            box-shadow: 0 14px 36px rgba(16, 32, 29, 0.18);
+        }
+
+        .shell {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        .topbar {
+            min-height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 23px;
+            font-weight: 850;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            backdrop-filter: blur(12px);
+        }
+
+        .btn-back {
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.13);
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 750;
+            backdrop-filter: blur(12px);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.22);
+            color: white;
+        }
+
+        .hero-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 24px;
+            align-items: end;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 13px;
+            font-weight: 750;
+            margin-bottom: 14px;
+        }
+
+        .page-title {
+            margin: 0;
+            max-width: 760px;
+            color: white;
+            font-size: clamp(34px, 5vw, 56px);
+            line-height: 1.05;
+            font-weight: 900;
+            letter-spacing: 0;
+        }
+
+        .page-subtitle {
+            margin: 14px 0 0;
+            max-width: 700px;
+            color: rgba(255, 255, 255, 0.80);
+            font-size: 17px;
+            line-height: 1.55;
+        }
+
+        .result-count {
+            min-width: 138px;
+            border-radius: 8px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            text-align: center;
+            backdrop-filter: blur(14px);
+        }
+
+        .result-count strong {
+            display: block;
+            font-size: 34px;
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .result-count span {
+            display: block;
+            margin-top: 6px;
+            color: rgba(255, 255, 255, 0.76);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 26px 0 56px;
+        }
+
+        .search-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface);
+            box-shadow: 0 14px 38px rgba(16, 32, 29, 0.06);
+        }
+
+        .summary-items {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .summary-pill {
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 11px;
+            border-radius: 8px;
+            background: #f8faf9;
+            border: 1px solid var(--line);
+            color: var(--ink);
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .summary-pill i {
+            color: var(--brand);
+        }
+
+        .summary-note {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .results-layout {
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .side-panel {
+            position: sticky;
+            top: 18px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            box-shadow: 0 14px 38px rgba(16, 32, 29, 0.06);
+            overflow: hidden;
+        }
+
+        .side-panel-header {
+            padding: 18px;
+            background: #10201d;
+            color: white;
+        }
+
+        .side-panel-header strong {
+            display: block;
+            font-size: 18px;
+            font-weight: 850;
+        }
+
+        .side-panel-header span {
+            display: block;
+            margin-top: 5px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .assurance-list {
+            display: grid;
+            gap: 2px;
+            padding: 12px;
+        }
+
+        .assurance-item {
+            display: flex;
+            gap: 10px;
+            padding: 11px 8px;
+            border-radius: 8px;
+        }
+
+        .assurance-item i {
+            color: var(--accent);
+            font-size: 20px;
+            flex: 0 0 auto;
+            margin-top: 1px;
+        }
+
+        .assurance-item strong {
+            display: block;
+            color: var(--ink);
+            font-size: 13px;
+            line-height: 1.35;
+            font-weight: 850;
+        }
+
+        .assurance-item span {
+            display: block;
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .hotel-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .hotel-card {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr) 190px;
+            gap: 18px;
+            min-height: 226px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            box-shadow: 0 14px 38px rgba(16, 32, 29, 0.07);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .hotel-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(15, 118, 110, 0.26);
+            box-shadow: 0 22px 46px rgba(16, 32, 29, 0.12);
+        }
+
+        .hotel-image {
+            position: relative;
+            width: 100%;
+            min-height: 202px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #dce5e1;
+        }
+
+        .hotel-image img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .hotel-placeholder {
+            width: 100%;
+            height: 100%;
+            min-height: 202px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #dce5e1 0%, #f8faf9 100%);
+            color: #8aa29b;
+            font-size: 48px;
+        }
+
+        .photo-badge {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 9px;
+            border-radius: 8px;
+            background: rgba(16, 32, 29, 0.78);
+            color: white;
+            font-size: 12px;
+            font-weight: 750;
+            backdrop-filter: blur(10px);
+        }
+
+        .hotel-main {
+            min-width: 0;
+            padding: 4px 0;
+        }
+
+        .hotel-topline {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .rating-score {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 42px;
+            min-height: 34px;
+            border-radius: 8px;
+            background: #10201d;
+            color: white;
+            padding: 6px 9px;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .rating-word {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 30px;
+            padding: 6px 9px;
+            border-radius: 8px;
+            background: #ecfdf5;
+            color: #047857;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .hotel-name {
+            margin: 0 0 9px;
+            color: var(--ink);
+            font-size: 22px;
+            line-height: 1.25;
+            font-weight: 850;
+            letter-spacing: 0;
+        }
+
+        .hotel-address {
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            max-width: 680px;
+            margin-bottom: 14px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.45;
+            font-weight: 600;
+        }
+
+        .hotel-address i {
+            color: var(--brand);
+            margin-top: 2px;
+            flex: 0 0 auto;
+        }
+
+        .hotel-perks {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .perk {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 9px;
+            border-radius: 8px;
+            background: #f8faf9;
+            border: 1px solid var(--line);
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .perk i {
+            color: var(--brand);
+        }
+
+        .hotel-side {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 8px 4px 4px;
+            text-align: right;
+        }
+
+        .price-label {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .hotel-price {
+            color: var(--ink);
+            font-size: 25px;
+            line-height: 1.1;
+            font-weight: 900;
+        }
+
+        .price-note {
+            display: block;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-detail {
+            width: 100%;
+            min-height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #1f1603;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 850;
+            box-shadow: 0 14px 30px rgba(245, 158, 11, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-detail:hover {
+            transform: translateY(-1px);
+            background: #fbbf24;
+            color: #1f1603;
+            box-shadow: 0 18px 34px rgba(245, 158, 11, 0.32);
+        }
+
+        .empty-state,
+        .error-banner {
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            box-shadow: 0 14px 38px rgba(16, 32, 29, 0.06);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 72px 22px;
+        }
+
+        .empty-state-icon {
+            width: 72px;
+            height: 72px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #f8faf9;
+            color: var(--brand);
+            font-size: 34px;
+            margin-bottom: 18px;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 8px;
+            color: var(--ink);
+            font-size: 26px;
+            font-weight: 850;
+        }
+
+        .empty-state p {
+            margin: 0 0 22px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.5;
+            font-weight: 600;
+        }
+
+        .btn-empty {
+            min-height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 8px;
+            background: var(--brand);
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .btn-empty:hover {
+            background: var(--brand-dark);
+            color: white;
+        }
+
+        .error-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 16px;
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+            margin-bottom: 18px;
+            font-weight: 650;
+        }
+
+        @@media (max-width: 1080px) {
+            .results-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .side-panel {
+                position: static;
+            }
+
+            .assurance-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .hotel-card {
+                grid-template-columns: 230px minmax(0, 1fr);
+            }
+
+            .hotel-side {
+                grid-column: 2;
+                align-items: flex-start;
+                text-align: left;
+                padding-top: 0;
+            }
+        }
+
+        @@media (max-width: 760px) {
+            .shell {
+                width: min(100% - 24px, 1180px);
+            }
+
+            .topbar,
+            .hero-row,
+            .search-summary {
+                align-items: flex-start;
+            }
+
+            .topbar,
+            .hero-row {
+                grid-template-columns: 1fr;
+                flex-direction: column;
+            }
+
+            .page-header {
+                padding-bottom: 26px;
+            }
+
+            .result-count {
+                width: 100%;
+                text-align: left;
+            }
+
+            .search-summary {
+                flex-direction: column;
+            }
+
+            .hotel-card {
+                grid-template-columns: 1fr;
+            }
+
+            .hotel-image,
+            .hotel-placeholder {
+                min-height: 230px;
+            }
+
+            .hotel-side {
+                grid-column: auto;
+                align-items: stretch;
+                text-align: left;
+            }
+
+            .hotel-name {
+                font-size: 20px;
+            }
+        }
+
+        @@media (max-width: 560px) {
+            .assurance-list {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-items {
+                width: 100%;
+            }
+
+            .summary-pill {
+                width: 100%;
+            }
+
+            .hotel-image,
+            .hotel-placeholder {
+                min-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <div class="shell">
+            <div class="topbar">
+                <a class="brand" asp-controller="Booking" asp-action="Search">
+                    <span class="brand-mark"><i class="bi bi-buildings"></i></span>
+                    Staylio
+                </a>
+                <a asp-action="Search" asp-controller="Booking" class="btn-back">
+                    <i class="bi bi-arrow-left"></i>
+                    Yeni arama
+                </a>
+            </div>
+
+            <div class="hero-row">
+                <div>
+                    <div class="eyebrow">
+                        <i class="bi bi-search-heart"></i>
+                        Arama sonuçları
+                    </div>
+                    <h1 class="page-title">@searchCity için konaklama seçenekleri</h1>
+                    <p class="page-subtitle">
+                        Tarih, konum, puan ve fiyat bilgilerini karşılaştırarak sizin için en uygun tesisi seçin.
+                    </p>
+                </div>
+                <div class="result-count">
+                    <strong>@hotels.Count</strong>
+                    <span>tesis bulundu</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="content">
+        <div class="shell">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="error-banner" role="alert">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span>@TempData["ErrorMessage"]</span>
+                </div>
+            }
+
+            @if (hotels.Count == 0)
+            {
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h3>Otel bulunamadı</h3>
+                    <p>Aradığınız kriterlere uygun tesis görünmüyor. Farklı şehir veya tarih aralığı deneyebilirsiniz.</p>
+                    <a asp-action="Search" asp-controller="Booking" class="btn-empty">
+                        <i class="bi bi-search"></i>
+                        Yeni arama yap
+                    </a>
+                </div>
+            }
+            else
+            {
+                <section class="search-summary" aria-label="Arama özeti">
+                    <div class="summary-items">
+                        <span class="summary-pill"><i class="bi bi-geo-alt"></i> @searchCity</span>
+                        <span class="summary-pill"><i class="bi bi-calendar2-check"></i> @checkInDate</span>
+                        <span class="summary-pill"><i class="bi bi-calendar2-week"></i> @checkOutDate</span>
+                        @if (!string.IsNullOrWhiteSpace(guests))
+                        {
+                            <span class="summary-pill"><i class="bi bi-people"></i> @guests kişi</span>
+                        }
+                    </div>
+                    <span class="summary-note">Fiyatlar ve müsaitlik seçilen tarihlere göre değişebilir.</span>
+                </section>
+
+                <div class="results-layout">
+                    <aside class="side-panel" aria-label="Rezervasyon avantajları">
+                        <div class="side-panel-header">
+                            <strong>Güvenle seçim yapın</strong>
+                            <span>Rezervasyon öncesi önemli bilgileri tek ekranda karşılaştırın.</span>
+                        </div>
+                        <div class="assurance-list">
+                            <div class="assurance-item">
+                                <i class="bi bi-credit-card"></i>
+                                <div>
+                                    <strong>Tesiste ödeme seçenekleri</strong>
+                                    <span>Uygun tesislerde ödeme koşullarını inceleyin.</span>
+                                </div>
+                            </div>
+                            <div class="assurance-item">
+                                <i class="bi bi-calendar2-x"></i>
+                                <div>
+                                    <strong>Ücretsiz iptal fırsatları</strong>
+                                    <span>Esnek seçenekleri sonuçlarda karşılaştırın.</span>
+                                </div>
+                            </div>
+                            <div class="assurance-item">
+                                <i class="bi bi-chat-square-heart"></i>
+                                <div>
+                                    <strong>Konuk değerlendirmeleri</strong>
+                                    <span>Puan ve yorum sinyalleri karar vermeyi kolaylaştırır.</span>
+                                </div>
+                            </div>
+                            <div class="assurance-item">
+                                <i class="bi bi-map"></i>
+                                <div>
+                                    <strong>Konum bilgisi</strong>
+                                    <span>Detay ekranında tesis konumunu haritada görün.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <section class="hotel-list" aria-label="Otel listesi">
+                        @foreach (var hotel in hotels)
+                        {
+                            var property = hotel.property;
+                            var photoUrl = property.photoUrls?.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+                            var hotelName = !string.IsNullOrWhiteSpace(property.name) ? property.name : "Otel adı belirtilmemiş";
+                            var reviewWord = !string.IsNullOrWhiteSpace(property.reviewScoreWord) ? property.reviewScoreWord : "Puanlandı";
+                            var priceValue = hotel.priceBreakdown?.grossPrice?.value;
+                            var hasPrice = priceValue.HasValue;
+                            var formattedPrice = hasPrice ? priceValue.GetValueOrDefault().ToString("N0") : "";
+                            var currency = hotel.priceBreakdown?.grossPrice?.currency ?? "";
+
+                            <article class="hotel-card">
+                                <div class="hotel-image">
+                                    @if (!string.IsNullOrWhiteSpace(photoUrl))
+                                    {
+                                        <img src="@photoUrl" alt="@hotelName">
+                                        <span class="photo-badge"><i class="bi bi-images"></i> Fotoğraflar</span>
+                                    }
+                                    else
+                                    {
+                                        <div class="hotel-placeholder">
+                                            <i class="bi bi-image"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="hotel-main">
+                                    <div class="hotel-topline">
+                                        @if (property.reviewScore.HasValue && property.reviewScore.Value > 0)
+                                        {
+                                            <span class="rating-score">@property.reviewScore.Value.ToString("F1")</span>
+                                            <span class="rating-word">@reviewWord</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="rating-word"><i class="bi bi-star"></i> Henüz puanlanmadı</span>
+                                        }
+                                        <span class="status-chip"><i class="bi bi-check-circle"></i> Müsaitlik kontrolü</span>
+                                    </div>
+
+                                    <h2 class="hotel-name">@hotelName</h2>
+
+                                    @if (!string.IsNullOrWhiteSpace(property.address))
+                                    {
+                                        <div class="hotel-address">
+                                            <i class="bi bi-geo-alt"></i>
+                                            <span>@property.address</span>
+                                        </div>
+                                    }
+
+                                    <div class="hotel-perks">
+                                        <span class="perk"><i class="bi bi-shield-check"></i> Güvenilir tesis bilgisi</span>
+                                        <span class="perk"><i class="bi bi-calendar2-x"></i> İptal koşullarını kontrol edin</span>
+                                        <span class="perk"><i class="bi bi-map"></i> Detayda harita</span>
+                                    </div>
+                                </div>
+
+                                <div class="hotel-side">
+                                    <div>
+                                        @if (hasPrice)
+                                        {
+                                            <span class="price-label">Seçilen tarih için</span>
+                                            <div class="hotel-price">
+                                                @formattedPrice @currency
+                                            </div>
+                                            <span class="price-note">Vergi ve koşullar tesise göre değişebilir.</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="price-label">Fiyat bilgisi</span>
+                                            <div class="hotel-price">Uygunlukta gösterilir</div>
+                                            <span class="price-note">Detay sayfasında kontrol edin.</span>
+                                        }
+                                    </div>
+
+                                    <a asp-controller="Booking"
+                                       asp-action="HotelDetail"
+                                       asp-route-id="@property.id"
+                                       class="btn-detail">
+                                        Detayları gör
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </article>
+                        }
+                    </section>
+                </div>
+            }
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
