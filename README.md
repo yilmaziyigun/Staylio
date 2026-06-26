@@ -1,4 +1,8 @@
 # 🏨 Staylio
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-6.0-blue)
+![C#](https://img.shields.io/badge/C%23-Programming-purple)
+![SQL Server](https://img.shields.io/badge/SQL_Server-Database-darkred)
+![RapidAPI](https://img.shields.io/badge/RapidAPI-External_APIs-green)
 
 Staylio, kullanıcıların şehir, tarih aralığı ve misafir sayısı bilgilerini girerek konaklama seçeneklerini görüntüleyebildiği modern bir otel arama uygulamasıdır.
 
